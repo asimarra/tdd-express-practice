@@ -4,12 +4,6 @@ const User = require('../src/user/User');
 const sequelize = require('../config/database');
 
 describe('User Registration', () => {
-  const userInput = {
-    username: 'user1',
-    email: 'user1@mail.com',
-    password: 'P@ssw0rd1',
-  };
-
   beforeAll(async () => {
     await sequelize.sync();
   });
@@ -18,18 +12,28 @@ describe('User Registration', () => {
     await User.destroy({ truncate: true });
   });
 
+  const userInput = {
+    username: 'user1',
+    email: 'user1@mail.com',
+    password: 'P@ssw0rd1',
+  };
+
+  const postValidUser = () => {
+    return supertest(app).post('/api/v1/users').send(userInput);
+  };
+
   it('should return 200 OK when sign up request is valid', async () => {
-    const response = await supertest(app).post('/api/v1/users').send(userInput);
+    const response = await postValidUser();
     expect(response.status).toBe(200);
   });
 
   it('should return sucess message when signup request is valid', async () => {
-    const response = await supertest(app).post('/api/v1/users').send(userInput);
+    const response = await postValidUser();
     expect(response.body.msg).toBe('User register successfully');
   });
 
   it('should save the user to database', async () => {
-    await supertest(app).post('/api/v1/users').send(userInput);
+    await postValidUser();
 
     const users = await User.findAll();
 
@@ -39,7 +43,7 @@ describe('User Registration', () => {
   });
 
   it('should hash the password in database', async () => {
-    await supertest(app).post('/api/v1/users').send(userInput);
+    await postValidUser();
 
     const users = await User.findAll();
 
