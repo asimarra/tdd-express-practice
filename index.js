@@ -1,10 +1,10 @@
 const app = require('./src/app');
-const sequelize = require('./config/database');
+const sequelize = require('./src/config/database');
 
 sequelize
   .sync()
   .then(() => {
-    console.log('Connected to the database');
+    console.log('Connected to the database.');
 
     app.listen(3000, () => {
       console.log('Server is running on port 3000');

@@ -1,7 +1,7 @@
 const supertest = require('supertest');
 const app = require('../src/app');
 const User = require('../src/user/User');
-const sequelize = require('../config/database');
+const sequelize = require('../src/config/database');
 
 describe('User Registration', () => {
   beforeAll(async () => {
