@@ -10,12 +10,12 @@ describe('User Registration', () => {
     password: 'P@ssw0rd1',
   };
 
-  beforeAll(() => {
-    return sequelize.sync();
+  beforeAll(async () => {
+    await sequelize.sync();
   });
 
-  beforeEach(() => {
-    User.destroy({ truncate: true });
+  beforeEach(async () => {
+    await User.destroy({ truncate: true });
   });
 
   it('should return 200 OK when sign up request is valid', async () => {
@@ -36,5 +36,13 @@ describe('User Registration', () => {
     expect(users.length).toBe(1);
     expect(users[0].username).toBe(userInput.username);
     expect(users[0].email).toBe(userInput.email);
+  });
+
+  it('should hash the password in database', async () => {
+    await supertest(app).post('/api/v1/users').send(userInput);
+
+    const users = await User.findAll();
+
+    expect(users[0].password).not.toBe(userInput.password);
   });
 });
