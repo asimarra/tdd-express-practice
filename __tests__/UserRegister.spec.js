@@ -3,21 +3,21 @@ const app = require('../src/app');
 const User = require('../src/user/User');
 const sequelize = require('../src/config/database');
 
+beforeAll(async () => {
+  await sequelize.sync();
+});
+
+beforeEach(async () => {
+  await User.destroy({ truncate: true });
+});
+
+const validUserInput = {
+  username: 'user1',
+  email: 'user1@mail.com',
+  password: 'P@ssw0rd1',
+};
+
 describe('User Registration', () => {
-  beforeAll(async () => {
-    await sequelize.sync();
-  });
-
-  beforeEach(async () => {
-    await User.destroy({ truncate: true });
-  });
-
-  const validUserInput = {
-    username: 'user1',
-    email: 'user1@mail.com',
-    password: 'P@ssw0rd1',
-  };
-
   const postValidUser = (user = validUserInput) => {
     return supertest(app).post('/api/v1/users').send(user);
   };
@@ -74,44 +74,51 @@ describe('User Registration', () => {
     ]);
   });
 
+  const username_null = 'Username cannot be null';
+  const username_size = 'Username must have min 4 and max 32 characters';
+  const email_null = 'Email cannot be null';
+  const email_invalid = 'Email is not valid';
+  const email_in_use = 'Email already in use';
+  const password_null = 'Password cannot be null';
+  const password_size = 'Password must be at least 6 characters';
+  const password_pattern =
+    'Password must have at least 1 uppercase, 1 lowercase letter and 1 number';
+
   it.each([
-    { field: 'username', value: null, expected: 'Username cannot be null' },
+    { field: 'username', value: null, expected: username_null },
     {
       field: 'username',
       value: 'usr',
-      expected: 'Username must have min 4 and max 32 characters',
+      expected: username_size,
     },
     {
       field: 'username',
       value: 'usr'.repeat(33),
-      expected: 'Username must have min 4 and max 32 characters',
+      expected: username_size,
     },
-    { field: 'email', value: null, expected: 'Email cannot be null' },
-    { field: 'email', value: 'email.com', expected: 'Email is not valid' },
-    { field: 'email', value: 'user@com', expected: 'Email is not valid' },
-    { field: 'password', value: null, expected: 'Password cannot be null' },
+    { field: 'email', value: null, expected: email_null },
+    { field: 'email', value: 'email.com', expected: email_invalid },
+    { field: 'email', value: 'user@com', expected: email_invalid },
+    { field: 'password', value: null, expected: password_null },
     {
       field: 'password',
       value: 'P4ss',
-      expected: 'Password must be at least 6 characters',
+      expected: password_size,
     },
     {
       field: 'password',
       value: 'lowercase',
-      expected:
-        'Password must have at least 1 uppercase, 1 lowercase letter and 1 number',
+      expected: password_pattern,
     },
     {
       field: 'password',
       value: 'UPPERCASE',
-      expected:
-        'Password must have at least 1 uppercase, 1 lowercase letter and 1 number',
+      expected: password_pattern,
     },
     {
       field: 'password',
       value: '123331111',
-      expected:
-        'Password must have at least 1 uppercase, 1 lowercase letter and 1 number',
+      expected: password_pattern,
     },
   ])(
     'should return "$expected" when $field is $value',
@@ -125,10 +132,10 @@ describe('User Registration', () => {
     }
   );
 
-  it('should return Email in use when same email is already in use', async () => {
+  it(`should return ${email_in_use} when same email is already in use`, async () => {
     await postValidUser();
     const response = await postValidUser();
-    expect(response.body.validationErrors.email).toBe('Email already in use');
+    expect(response.body.validationErrors.email).toBe(email_in_use);
   });
 
   it('should return error for both username is null and email is in use', async () => {
@@ -141,5 +148,79 @@ describe('User Registration', () => {
       'username',
       'email',
     ]);
+  });
+});
+
+describe('Internationalization', () => {
+  const username_null = 'El nombre de usuario no puede estar vacío';
+  const username_size =
+    'El nombre de usuario debe tener entre 4 y 32 caracteres';
+  const email_null = 'El correo electrónico no puede estar vacío';
+  const email_invalid = 'El correo electrónico no es válido';
+  const email_in_use = 'El correo electrónico ya está en uso';
+  const password_null = 'La contraseña no puede estar vacía';
+  const password_size = 'La contraseña debe tener al menos 6 caracteres';
+  const password_pattern =
+    'La contraseña debe tener al menos 1 letra mayúscula, 1 letra minúscula y 1 número';
+
+  const postValidUser = (user = validUserInput) => {
+    return supertest(app)
+      .post('/api/v1/users')
+      .set('Accept-Language', 'es')
+      .send(user);
+  };
+
+  it.each([
+    { field: 'username', value: null, expected: username_null },
+    {
+      field: 'username',
+      value: 'usr',
+      expected: username_size,
+    },
+    {
+      field: 'username',
+      value: 'usr'.repeat(33),
+      expected: username_size,
+    },
+    { field: 'email', value: null, expected: email_null },
+    { field: 'email', value: 'email.com', expected: email_invalid },
+    { field: 'email', value: 'user@com', expected: email_invalid },
+    { field: 'password', value: null, expected: password_null },
+    {
+      field: 'password',
+      value: 'P4ss',
+      expected: password_size,
+    },
+    {
+      field: 'password',
+      value: 'lowercase',
+      expected: password_pattern,
+    },
+    {
+      field: 'password',
+      value: 'UPPERCASE',
+      expected: password_pattern,
+    },
+    {
+      field: 'password',
+      value: '123331111',
+      expected: password_pattern,
+    },
+  ])(
+    'should return "$expected" when $field is $value when language is set as Spanish',
+    async ({ field, value, expected }) => {
+      const input = {
+        ...validUserInput,
+        [field]: value,
+      };
+      const response = await postValidUser(input);
+      expect(response.body.validationErrors[field]).toBe(expected);
+    }
+  );
+
+  it(`should return ${email_in_use} when same email is already in use when language is set as Spanish`, async () => {
+    await postValidUser();
+    const response = await postValidUser();
+    expect(response.body.validationErrors.email).toBe(email_in_use);
   });
 });
