@@ -76,8 +76,43 @@ describe('User Registration', () => {
 
   it.each([
     { field: 'username', value: null, expected: 'Username cannot be null' },
+    {
+      field: 'username',
+      value: 'usr',
+      expected: 'Username must have min 4 and max 32 characters',
+    },
+    {
+      field: 'username',
+      value: 'usr'.repeat(33),
+      expected: 'Username must have min 4 and max 32 characters',
+    },
     { field: 'email', value: null, expected: 'Email cannot be null' },
+    { field: 'email', value: 'email.com', expected: 'Email is not valid' },
+    { field: 'email', value: 'user@com', expected: 'Email is not valid' },
     { field: 'password', value: null, expected: 'Password cannot be null' },
+    {
+      field: 'password',
+      value: 'P4ss',
+      expected: 'Password must be at least 6 characters',
+    },
+    {
+      field: 'password',
+      value: 'lowercase',
+      expected:
+        'Password must have at least 1 uppercase, 1 lowercase letter and 1 number',
+    },
+    {
+      field: 'password',
+      value: 'UPPERCASE',
+      expected:
+        'Password must have at least 1 uppercase, 1 lowercase letter and 1 number',
+    },
+    {
+      field: 'password',
+      value: '123331111',
+      expected:
+        'Password must have at least 1 uppercase, 1 lowercase letter and 1 number',
+    },
   ])(
     'should return "$expected" when $field is $value',
     async ({ field, value, expected }) => {
