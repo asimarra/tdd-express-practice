@@ -17,19 +17,34 @@ const validUserInput = {
   password: 'P@ssw0rd1',
 };
 
+const postValidUser = (user = validUserInput, options = {}) => {
+  const request = supertest(app).post('/api/v1/users');
+  if (options.language) {
+    request.set('Accept-Language', options.language);
+  }
+  return request.send(user);
+};
+
 describe('User Registration', () => {
-  const postValidUser = (user = validUserInput) => {
-    return supertest(app).post('/api/v1/users').send(user);
-  };
+  const username_null = 'Username cannot be null';
+  const username_size = 'Username must have min 4 and max 32 characters';
+  const email_null = 'Email cannot be null';
+  const email_invalid = 'Email is not valid';
+  const email_in_use = 'Email already in use';
+  const password_null = 'Password cannot be null';
+  const password_size = 'Password must be at least 6 characters';
+  const password_pattern =
+    'Password must have at least 1 uppercase, 1 lowercase letter and 1 number';
+  const user_register_success = 'User register successfully';
 
   it('should return 200 OK when sign up request is valid', async () => {
     const response = await postValidUser();
     expect(response.status).toBe(200);
   });
 
-  it('should return sucess message when signup request is valid', async () => {
+  it(`should return ${user_register_success} when signup request is valid`, async () => {
     const response = await postValidUser();
-    expect(response.body.msg).toBe('User register successfully');
+    expect(response.body.msg).toBe(user_register_success);
   });
 
   it('should save the user to database', async () => {
@@ -73,16 +88,6 @@ describe('User Registration', () => {
       'email',
     ]);
   });
-
-  const username_null = 'Username cannot be null';
-  const username_size = 'Username must have min 4 and max 32 characters';
-  const email_null = 'Email cannot be null';
-  const email_invalid = 'Email is not valid';
-  const email_in_use = 'Email already in use';
-  const password_null = 'Password cannot be null';
-  const password_size = 'Password must be at least 6 characters';
-  const password_pattern =
-    'Password must have at least 1 uppercase, 1 lowercase letter and 1 number';
 
   it.each([
     { field: 'username', value: null, expected: username_null },
@@ -152,6 +157,7 @@ describe('User Registration', () => {
 });
 
 describe('Internationalization', () => {
+  const options = { language: 'es' };
   const username_null = 'El nombre de usuario no puede estar vacío';
   const username_size =
     'El nombre de usuario debe tener entre 4 y 32 caracteres';
@@ -162,13 +168,12 @@ describe('Internationalization', () => {
   const password_size = 'La contraseña debe tener al menos 6 caracteres';
   const password_pattern =
     'La contraseña debe tener al menos 1 letra mayúscula, 1 letra minúscula y 1 número';
+  const user_register_success = 'El usuario ha sido registrado exitosamente';
 
-  const postValidUser = (user = validUserInput) => {
-    return supertest(app)
-      .post('/api/v1/users')
-      .set('Accept-Language', 'es')
-      .send(user);
-  };
+  it(`should return ${user_register_success} when signup request is valid and language is set as Spanish`, async () => {
+    const response = await postValidUser({ ...validUserInput }, options);
+    expect(response.body.msg).toBe(user_register_success);
+  });
 
   it.each([
     { field: 'username', value: null, expected: username_null },
@@ -213,14 +218,14 @@ describe('Internationalization', () => {
         ...validUserInput,
         [field]: value,
       };
-      const response = await postValidUser(input);
+      const response = await postValidUser(input, options);
       expect(response.body.validationErrors[field]).toBe(expected);
     }
   );
 
   it(`should return ${email_in_use} when same email is already in use when language is set as Spanish`, async () => {
     await postValidUser();
-    const response = await postValidUser();
+    const response = await postValidUser({ ...validUserInput }, options);
     expect(response.body.validationErrors.email).toBe(email_in_use);
   });
 });
