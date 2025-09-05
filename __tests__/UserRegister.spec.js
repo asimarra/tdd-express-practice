@@ -154,6 +154,24 @@ describe('User Registration', () => {
       'email',
     ]);
   });
+
+  it('should create user in inactive mode', async () => {
+    await postValidUser();
+    const addedUser = await User.findOne();
+    expect(addedUser.inactive).toBeTruthy();
+  });
+
+  it('should create user in inactive mode even if the request body contains inactive as false', async () => {
+    await postValidUser({ ...validUserInput, inactive: false });
+    const addedUser = await User.findOne();
+    expect(addedUser.inactive).toBeTruthy();
+  });
+
+  it('should create an activation token for user', async () => {
+    await postValidUser();
+    const addedUser = await User.findOne();
+    expect(addedUser.activationToken).toBeTruthy();
+  });
 });
 
 describe('Internationalization', () => {
