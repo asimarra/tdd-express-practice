@@ -4,7 +4,7 @@ const UserService = require('./UserService');
 const router = express.Router();
 
 router.post(
-  '/api/v1/users',
+  '/api/1.0/users',
   check('username')
     .notEmpty()
     .withMessage('username_null')

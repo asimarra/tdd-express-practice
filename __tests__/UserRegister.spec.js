@@ -18,7 +18,7 @@ const validUserInput = {
 };
 
 const postValidUser = (user = validUserInput, options = {}) => {
-  const request = supertest(app).post('/api/v1/users');
+  const request = supertest(app).post('/api/1.0/users');
   if (options.language) {
     request.set('Accept-Language', options.language);
   }
