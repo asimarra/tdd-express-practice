@@ -48,8 +48,12 @@ router.post(
       });
     }
 
-    await UserService.save(req.body);
-    return res.status(200).json({ msg: req.t('user_register_success') });
+    try {
+      await UserService.save(req.body);
+      return res.status(200).json({ message: req.t('user_register_success') });
+    } catch (error) {
+      return res.status(502).send({ message: req.t('user_register_fail') });
+    }
   }
 );
 

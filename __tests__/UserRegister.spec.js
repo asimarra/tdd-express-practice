@@ -3,6 +3,7 @@ const nodemailerStub = require('nodemailer-stub');
 const app = require('../src/app');
 const User = require('../src/user/User');
 const sequelize = require('../src/config/database');
+const EmailService = require('../email/EmailService');
 
 beforeAll(async () => {
   await sequelize.sync();
@@ -37,6 +38,7 @@ describe('User Registration', () => {
   const password_pattern =
     'Password must have at least 1 uppercase, 1 lowercase letter and 1 number';
   const user_register_success = 'User register successfully';
+  const user_register_fail = 'User register failed';
 
   it('should return 200 OK when sign up request is valid', async () => {
     const response = await postValidUser();
@@ -45,7 +47,7 @@ describe('User Registration', () => {
 
   it(`should return ${user_register_success} when signup request is valid`, async () => {
     const response = await postValidUser();
-    expect(response.body.msg).toBe(user_register_success);
+    expect(response.body.message).toBe(user_register_success);
   });
 
   it('should save the user to database', async () => {
@@ -181,6 +183,37 @@ describe('User Registration', () => {
     expect(lastMail.to).toContain(validUserInput.email);
     expect(lastMail.content).toContain(addedUser.activationToken);
   });
+
+  it('should return 502 Bad Gateway when sending email fails', async () => {
+    const mockSendAccountActivation = jest
+      .spyOn(EmailService, 'sendAccountActivation')
+      .mockRejectedValue({ message: 'Failed to deliver email' });
+    const response = await postValidUser();
+    expect(response.status).toBe(502);
+    mockSendAccountActivation.mockRestore();
+  });
+
+  it(`should return "${user_register_fail}" message when sending email fails`, async () => {
+    const mockSendAccountActivation = jest
+      .spyOn(EmailService, 'sendAccountActivation')
+      .mockRejectedValue({ message: 'Failed to deliver email' });
+    const response = await postValidUser();
+    expect(response.body.message).toBe(user_register_fail);
+    mockSendAccountActivation.mockRestore();
+  });
+
+  it('should not save the user to database if activation mail fails', async () => {
+    const mockSendAccountActivation = jest
+      .spyOn(EmailService, 'sendAccountActivation')
+      .mockRejectedValue({ message: 'Failed to deliver email' });
+
+    await postValidUser();
+
+    const users = await User.findAll();
+    expect(users.length).toBe(0);
+
+    mockSendAccountActivation.mockRestore();
+  });
 });
 
 describe('Internationalization', () => {
@@ -196,10 +229,11 @@ describe('Internationalization', () => {
   const password_pattern =
     'La contraseña debe tener al menos 1 letra mayúscula, 1 letra minúscula y 1 número';
   const user_register_success = 'El usuario ha sido registrado exitosamente';
+  const user_register_fail = 'Error al registrar usuario';
 
   it(`should return ${user_register_success} when signup request is valid and language is set as Spanish`, async () => {
     const response = await postValidUser({ ...validUserInput }, options);
-    expect(response.body.msg).toBe(user_register_success);
+    expect(response.body.message).toBe(user_register_success);
   });
 
   it.each([
@@ -254,5 +288,14 @@ describe('Internationalization', () => {
     await postValidUser();
     const response = await postValidUser({ ...validUserInput }, options);
     expect(response.body.validationErrors.email).toBe(email_in_use);
+  });
+
+  it(`should return "${user_register_fail}" message when sending email fails`, async () => {
+    const mockSendAccountActivation = jest
+      .spyOn(EmailService, 'sendAccountActivation')
+      .mockRejectedValue({ message: 'Failed to deliver email' });
+    const response = await postValidUser({ ...validUserInput }, options);
+    expect(response.body.message).toBe(user_register_fail);
+    mockSendAccountActivation.mockRestore();
   });
 });

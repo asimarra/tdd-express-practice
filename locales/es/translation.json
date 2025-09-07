@@ -7,5 +7,6 @@
   "password_null": "La contraseña no puede estar vacía",
   "password_size": "La contraseña debe tener al menos 6 caracteres",
   "password_pattern": "La contraseña debe tener al menos 1 letra mayúscula, 1 letra minúscula y 1 número",
-  "user_register_success": "El usuario ha sido registrado exitosamente"
+  "user_register_success": "El usuario ha sido registrado exitosamente",
+  "user_register_fail": "Error al registrar usuario"
 }
