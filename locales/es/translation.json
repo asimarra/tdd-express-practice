@@ -8,5 +8,7 @@
   "password_size": "La contraseña debe tener al menos 6 caracteres",
   "password_pattern": "La contraseña debe tener al menos 1 letra mayúscula, 1 letra minúscula y 1 número",
   "user_register_success": "El usuario ha sido registrado exitosamente",
-  "user_register_fail": "Error al registrar usuario"
+  "user_register_fail": "Error al registrar usuario",
+  "account_activation_failure": "Esta cuenta está activada o el token no es válido",
+  "account_activation_success": "Cuenta activada exitosamente"
 }

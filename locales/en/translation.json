@@ -8,5 +8,7 @@
   "password_size": "Password must be at least 6 characters",
   "password_pattern": "Password must have at least 1 uppercase, 1 lowercase letter and 1 number",
   "user_register_success": "User register successfully",
-  "user_register_fail": "User register failed"
+  "user_register_fail": "User register failed",
+  "account_activation_failure": "This account is either activate or the token is invalid",
+  "account_activation_success": "Account activated successfully"
 }

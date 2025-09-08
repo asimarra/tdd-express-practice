@@ -3,6 +3,7 @@ const bcryp = require('bcrypt');
 const User = require('./User');
 const EmailService = require('../../email/EmailService');
 const sequelize = require('../config/database');
+const InvalidTokenExeption = require('./InvalidTokenExeption');
 
 const save = async (userData) => {
   const { username, email, password } = userData;
@@ -39,7 +40,18 @@ const _generateToken = (length = 16) => {
   return crypto.randomBytes(length).toString('hex').substring(0, length);
 };
 
+const activate = async (token) => {
+  const user = await User.findOne({ where: { activationToken: token } });
+  if (!user) {
+    throw new InvalidTokenExeption();
+  }
+  user.inactive = false;
+  user.activationToken = null;
+  return await user.save();
+};
+
 module.exports = {
   save,
   findByEmail,
+  activate,
 };
