@@ -313,3 +313,85 @@ describe('Internationalization', () => {
     expect(response.body.message).toBe(user_register_fail);
   });
 });
+
+describe('Account activation', () => {
+  it('should activate the account when correct token is sent', async () => {
+    await postValidUser();
+
+    let addedUser = await User.findOne();
+    const token = addedUser.activationToken;
+
+    await supertest(app).post(`/api/1.0/users/token/${token}`).send();
+    let activatedUser = await User.findOne();
+    expect(activatedUser.inactive).toBeFalsy();
+  });
+
+  it('should removes the token from user table after sucessful activation', async () => {
+    await postValidUser();
+
+    let addedUser = await User.findOne();
+    const token = addedUser.activationToken;
+
+    await supertest(app).post(`/api/1.0/users/token/${token}`).send();
+    let activatedUser = await User.findOne();
+    expect(activatedUser.activationToken).toBeFalsy();
+  });
+
+  it('should not activate the account when the token is wrong', async () => {
+    await postValidUser();
+
+    await supertest(app).post('/api/1.0/users/token/wrong-token').send();
+
+    let user = await User.findOne();
+    expect(user.inactive).toBeTruthy();
+  });
+
+  it('should return bad response when the token is wrong', async () => {
+    await postValidUser();
+
+    const response = await supertest(app)
+      .post('/api/1.0/users/token/wrong-token')
+      .send();
+    expect(response.status).toBe(400);
+  });
+
+  it.each([
+    {
+      language: 'en',
+      tokenStatus: 'wrong',
+      message: 'This account is either activate or the token is invalid',
+    },
+    {
+      language: 'es',
+      tokenStatus: 'wrong',
+      message: 'Esta cuenta está activada o el token no es válido',
+    },
+    {
+      language: 'en',
+      tokenStatus: 'success',
+      message: 'Account activated successfully',
+    },
+    {
+      language: 'es',
+      tokenStatus: 'success',
+      message: 'Cuenta activada exitosamente',
+    },
+  ])(
+    'should return "$message" when wrong token is sent and language is $language',
+    async ({ language, tokenStatus, message }) => {
+      await postValidUser();
+
+      let token = 'wrong-token';
+      if (tokenStatus === 'success') {
+        let addedUser = await User.findOne();
+        token = addedUser.activationToken;
+      }
+
+      const response = await supertest(app)
+        .post(`/api/1.0/users/token/${token}`)
+        .set('Accept-Language', language)
+        .send();
+      expect(response.body.message).toBe(message);
+    }
+  );
+});
