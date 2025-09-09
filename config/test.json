@@ -6,5 +6,12 @@
     "dialect": "sqlite",
     "storage": ":memory:",
     "logging": false
+  },
+  "mail": {
+    "host": "127.0.0.1",
+    "port": 8587,
+    "tls": {
+      "rejectUnauthorized": false
+    }
   }
 }
