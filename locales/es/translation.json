@@ -10,5 +10,6 @@
   "user_register_success": "El usuario ha sido registrado exitosamente",
   "user_register_fail": "Error al registrar usuario",
   "account_activation_failure": "Esta cuenta está activada o el token no es válido",
-  "account_activation_success": "Cuenta activada exitosamente"
+  "account_activation_success": "Cuenta activada exitosamente",
+  "default_error_message": "Ocurrio un error, intente nuevamente"
 }

@@ -1,6 +1,7 @@
 const express = require('express');
 const { validationResult, check, body } = require('express-validator');
 const UserService = require('./UserService');
+const ValidationException = require('../error/ValidationException');
 const router = express.Router();
 
 router.post(
@@ -39,13 +40,7 @@ router.post(
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      const validationErrors = {};
-      errors.array().forEach((error) => {
-        validationErrors[error.path] = req.t(error.msg);
-      });
-      return res.status(400).send({
-        validationErrors,
-      });
+      throw new ValidationException(errors.array());
     }
 
     try {
@@ -58,15 +53,9 @@ router.post(
 );
 
 router.post('/api/1.0/users/token/:token', async (req, res) => {
-  try {
-    const token = req.params.token;
-    await UserService.activate(token);
-    return res.send({ message: req.t('account_activation_success') });
-  } catch (error) {
-    return res
-      .status(400)
-      .send({ message: req.t('account_activation_failure') });
-  }
+  const token = req.params.token;
+  await UserService.activate(token);
+  return res.send({ message: req.t('account_activation_success') });
 });
 
 module.exports = router;
