@@ -231,6 +231,11 @@ describe('User Registration', () => {
     const users = await User.findAll();
     expect(users.length).toBe(0);
   });
+
+  it('should return Validation Failure message in error response body when validation fails', async () => {
+    const response = await postValidUser({ ...validUserInput, username: null });
+    expect(response.body.message).toBe('Validation Failure');
+  });
 });
 
 describe('Internationalization', () => {
@@ -247,6 +252,7 @@ describe('Internationalization', () => {
     'La contraseña debe tener al menos 1 letra mayúscula, 1 letra minúscula y 1 número';
   const user_register_success = 'El usuario ha sido registrado exitosamente';
   const user_register_fail = 'Error al registrar usuario';
+  const validation_fail = 'Error en la validación';
 
   it(`should return ${user_register_success} when signup request is valid and language is set as Spanish`, async () => {
     const response = await postValidUser({ ...validUserInput }, options);
@@ -307,10 +313,18 @@ describe('Internationalization', () => {
     expect(response.body.validationErrors.email).toBe(email_in_use);
   });
 
-  it(`should return "${user_register_fail}" message when sending email fails`, async () => {
+  it(`should return "${user_register_fail}" message when sending email fails using the Spanish language`, async () => {
     simulateSmtpFailure = true;
     const response = await postValidUser({ ...validUserInput }, options);
     expect(response.body.message).toBe(user_register_fail);
+  });
+
+  it(`should return ${validation_fail} message in error response body when validation fails using the Spanish language`, async () => {
+    const response = await postValidUser(
+      { ...validUserInput, username: null },
+      options
+    );
+    expect(response.body.message).toBe(validation_fail);
   });
 });
 

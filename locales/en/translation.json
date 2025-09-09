@@ -11,5 +11,6 @@
   "user_register_fail": "User register failed",
   "account_activation_failure": "This account is either activate or the token is invalid",
   "account_activation_success": "Account activated successfully",
-  "default_error_message": "Occurs an error, try again please"
+  "default_error_message": "Occurs an error, try again please",
+  "validation_failure": "Validation Failure"
 }
