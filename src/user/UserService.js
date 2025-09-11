@@ -1,7 +1,7 @@
 const crypto = require('node:crypto');
 const bcryp = require('bcrypt');
 const User = require('./User');
-const EmailService = require('../../email/EmailService');
+const EmailService = require('../email/EmailService');
 const sequelize = require('../config/database');
 const InvalidTokenExeption = require('./InvalidTokenExeption');
 
