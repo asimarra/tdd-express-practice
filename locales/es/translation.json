@@ -12,5 +12,7 @@
   "account_activation_failure": "Esta cuenta está activada o el token no es válido",
   "account_activation_success": "Cuenta activada exitosamente",
   "default_error_message": "Ocurrio un error, intente nuevamente",
-  "validation_failure": "Error en la validación"
+  "validation_failure": "Error en la validación",
+  "authentication_failure": "Credenciales invalidas",
+  "inactive_authentication_failure": "La cuenta esta inactiva"
 }
