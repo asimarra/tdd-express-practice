@@ -1,7 +1,7 @@
 const crypto = require('node:crypto');
 const bcryp = require('bcrypt');
 const User = require('./User');
-const EmailService = require('../../email/EmailService');
+const EmailService = require('../email/EmailService');
 const sequelize = require('../config/database');
 const InvalidTokenExeption = require('./InvalidTokenExeption');
 
@@ -50,8 +50,26 @@ const activate = async (token) => {
   return await user.save();
 };
 
+const getUsers = async (page) => {
+  const pageSize = 10;
+  const usersWithCount = await User.findAndCountAll({
+    where: { inactive: false },
+    attributes: ['id', 'username', 'email'],
+    limit: pageSize,
+    offset: page * pageSize,
+  });
+
+  return {
+    content: usersWithCount.rows,
+    page,
+    size: 10,
+    totalPages: Math.ceil(usersWithCount.count / pageSize),
+  };
+};
+
 module.exports = {
   save,
   findByEmail,
   activate,
+  getUsers,
 };
