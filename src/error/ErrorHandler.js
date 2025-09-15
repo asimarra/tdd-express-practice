@@ -9,5 +9,10 @@ module.exports = (error, req, res, _) => {
     });
   }
 
-  return res.status(status).send({ message: req.t(message), validationErrors });
+  return res.status(status).send({
+    path: req.originalUrl,
+    timestamp: new Date().getTime(),
+    message: req.t(message),
+    validationErrors,
+  });
 };

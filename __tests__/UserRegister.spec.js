@@ -409,3 +409,40 @@ describe('Account activation', () => {
     }
   );
 });
+
+describe('Error Model', () => {
+  it('should return path, timestamp, message and validationErrors in response when validation failure', async () => {
+    const response = await postValidUser({ ...validUserInput, username: null });
+    expect(Object.keys(response.body)).toEqual([
+      'path',
+      'timestamp',
+      'message',
+      'validationErrors',
+    ]);
+  });
+
+  it('should return path, timestamp and message in response when request fails other than validation error', async () => {
+    const response = await supertest(app)
+      .post('/api/1.0/users/token/wrong-token')
+      .send();
+    expect(Object.keys(response.body)).toEqual([
+      'path',
+      'timestamp',
+      'message',
+    ]);
+  });
+
+  it('should return path in error body', async () => {
+    const response = await supertest(app)
+      .post('/api/1.0/users/token/wrong-token')
+      .send();
+    expect(response.body.path).toEqual('/api/1.0/users/token/wrong-token');
+  });
+
+  it('should return timestamp in error body', async () => {
+    const response = await supertest(app)
+      .post('/api/1.0/users/token/wrong-token')
+      .send();
+    expect(response.body.timestamp).toBeTruthy();
+  });
+});
