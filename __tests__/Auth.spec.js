@@ -3,6 +3,8 @@ const bcrypt = require('bcrypt');
 const app = require('../src/app');
 const User = require('../src/user/User');
 const sequelize = require('../src/config/database');
+const en = require('../locales/en/translation.json');
+const es = require('../locales/es/translation.json');
 
 beforeAll(async () => {
   await sequelize.sync();
@@ -120,8 +122,8 @@ describe('Authentication', () => {
   });
 
   it.each([
-    { language: 'en', message: 'Account is inactive' },
-    { language: 'es', message: 'La cuenta esta inactiva' },
+    { language: 'en', message: en.inactive_authentication_failure },
+    { language: 'es', message: es.inactive_authentication_failure },
   ])(
     'should return $message when authentication fails for inactive account and language is set as $language',
     async ({ language, message }) => {
