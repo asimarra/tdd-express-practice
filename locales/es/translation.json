@@ -14,5 +14,6 @@
   "default_error_message": "Ocurrio un error, intente nuevamente",
   "validation_failure": "Error en la validación",
   "authentication_failure": "Credenciales invalidas",
-  "inactive_authentication_failure": "La cuenta esta inactiva"
+  "inactive_authentication_failure": "La cuenta esta inactiva",
+  "user_not_found": "El usuario no existe"
 }

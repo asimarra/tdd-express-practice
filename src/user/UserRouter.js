@@ -64,4 +64,10 @@ router.get('/api/1.0/users', async (req, res) => {
   return res.send(users);
 });
 
+router.get('/api/1.0/users/:id', async (req, res) => {
+  const userId = req.params.id;
+  const user = await UserService.getUser(userId);
+  return res.send(user);
+});
+
 module.exports = router;

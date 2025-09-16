@@ -4,6 +4,7 @@ const User = require('./User');
 const EmailService = require('../email/EmailService');
 const sequelize = require('../config/database');
 const InvalidTokenExeption = require('./InvalidTokenExeption');
+const UserNotFoundException = require('./UserNotFoundException');
 
 const save = async (userData) => {
   const { username, email, password } = userData;
@@ -67,9 +68,23 @@ const getUsers = async (page) => {
   };
 };
 
+const getUser = async (id) => {
+  const user = await User.findOne({
+    attributes: ['id', 'username', 'email'],
+    where: { id, inactive: false },
+  });
+
+  if (!user) {
+    throw new UserNotFoundException();
+  }
+
+  return user;
+};
+
 module.exports = {
   save,
   findByEmail,
   activate,
   getUsers,
+  getUser,
 };

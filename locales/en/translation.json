@@ -14,5 +14,6 @@
   "default_error_message": "Occurs an error, try again please",
   "validation_failure": "Validation Failure",
   "authentication_failure": "Incorrect credentials",
-  "inactive_authentication_failure": "Account is inactive"
+  "inactive_authentication_failure": "Account is inactive",
+  "user_not_found": "User not found"
 }
