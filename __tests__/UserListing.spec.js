@@ -6,11 +6,21 @@ const sequelize = require('../src/config/database');
 const en = require('../locales/en/translation.json');
 const es = require('../locales/es/translation.json');
 
+const auth = async (options = {}) => {
+  let token;
+  if (options.auth) {
+    const response = await supertest(app)
+      .post(`/api/1.0/auth`)
+      .send(options.auth);
+    token = response?.body?.token;
+  }
+  return token;
+};
+
 const getUsers = (options = {}) => {
   const request = supertest(app).get('/api/1.0/users');
-  if (options.auth) {
-    const { email, password } = options.auth;
-    request.auth(email, password);
+  if (options.token) {
+    request.set('Authorization', `Bearer ${options.token}`);
   }
   return request.send();
 };
@@ -119,9 +129,10 @@ describe('Listing users', () => {
 
   it('should return user page without logged in user when request has valid authorization', async () => {
     await addUsers(11);
-    const response = await getUsers({
+    const token = await auth({
       auth: { email: 'user1@mail.com', password: 'P4ssword' },
     });
+    const response = await getUsers({ token });
     expect(response.body.totalPages).toBe(1);
   });
 });

@@ -3,7 +3,7 @@ const { validationResult, check, body } = require('express-validator');
 const UserService = require('./UserService');
 const ValidationException = require('../error/ValidationException');
 const ForbiddenException = require('../auth/ForbiddenException');
-const basicAuthentication = require('../middleware/basicAuthentication');
+const tokenAuthentication = require('../middleware/tokenAuthentication');
 const pagination = require('../middleware/pagination');
 const router = express.Router();
 
@@ -63,7 +63,7 @@ router.post('/api/1.0/users/token/:token', async (req, res) => {
 
 router.get(
   '/api/1.0/users',
-  basicAuthentication,
+  tokenAuthentication,
   pagination,
   async (req, res) => {
     const { page, size } = req.pagination;
@@ -79,7 +79,7 @@ router.get('/api/1.0/users/:id', async (req, res) => {
   return res.send(user);
 });
 
-router.put('/api/1.0/users/:id', basicAuthentication, async (req, res) => {
+router.put('/api/1.0/users/:id', tokenAuthentication, async (req, res) => {
   const userId = +req.params.id;
   const authenticatedUser = req.authenticatedUser;
   if (!authenticatedUser || userId !== authenticatedUser.id) {
