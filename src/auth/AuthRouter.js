@@ -4,6 +4,7 @@ const { check, validationResult } = require('express-validator');
 const UserService = require('../user/UserService');
 const AuthenticationException = require('./AuthenticationException');
 const ForbiddenException = require('./ForbiddenException');
+const TokenService = require('./TokenService');
 const router = express.Router();
 
 router.post('/api/1.0/auth', check('email').isEmail(), async (req, res) => {
@@ -28,9 +29,12 @@ router.post('/api/1.0/auth', check('email').isEmail(), async (req, res) => {
     throw new ForbiddenException();
   }
 
+  const token = TokenService.createToken(user);
+
   res.send({
     id: user.id,
     username: user.username,
+    token,
   });
 });
 

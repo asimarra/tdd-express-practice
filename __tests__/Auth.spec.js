@@ -36,7 +36,7 @@ const postAuthentication = async (credentials, options = {}) => {
 };
 
 describe('Authentication', () => {
-  it('returns 200 when credentials are correct', async () => {
+  it('should return 200 when credentials are correct', async () => {
     await addUser();
     const response = await postAuthentication({
       email: 'user1@mail.com',
@@ -45,7 +45,7 @@ describe('Authentication', () => {
     expect(response.status).toBe(200);
   });
 
-  it('returns only user id and username when user email exists', async () => {
+  it('should return user id, username and token when login success', async () => {
     const user = await addUser();
     const response = await postAuthentication({
       email: 'user1@mail.com',
@@ -53,10 +53,10 @@ describe('Authentication', () => {
     });
     expect(response.body.id).toBe(user.id);
     expect(response.body.username).toBe(user.username);
-    expect(Object.keys(response.body)).toEqual(['id', 'username']);
+    expect(Object.keys(response.body)).toEqual(['id', 'username', 'token']);
   });
 
-  it('returns 401 when user does not exist', async () => {
+  it('should return 401 when user does not exist', async () => {
     const response = await postAuthentication({
       email: 'user1@mail.com',
       password: 'P4ssword',
@@ -64,7 +64,7 @@ describe('Authentication', () => {
     expect(response.status).toBe(401);
   });
 
-  it('returns proper error body when authentication fails', async () => {
+  it('should return proper error body when authentication fails', async () => {
     const nowInMillis = new Date().getTime();
     const response = await postAuthentication({
       email: 'user1@mail.com',
@@ -90,7 +90,7 @@ describe('Authentication', () => {
     }
   );
 
-  it('returns 401 when password is wrong', async () => {
+  it('should return 401 when password is wrong', async () => {
     await addUser();
     const response = await postAuthentication({
       email: 'user1@mail.com',
@@ -99,7 +99,7 @@ describe('Authentication', () => {
     expect(response.status).toBe(401);
   });
 
-  it('returns 403 when logging in with an inactive account', async () => {
+  it('should return 403 when logging in with an inactive account', async () => {
     await addUser({ ...activeUser, inactive: true });
     const response = await postAuthentication({
       email: 'user1@mail.com',
@@ -108,7 +108,7 @@ describe('Authentication', () => {
     expect(response.status).toBe(403);
   });
 
-  it('returns proper error body when inactive authentication fails', async () => {
+  it('should return proper error body when inactive authentication fails', async () => {
     await addUser({ ...activeUser, inactive: true });
     const nowInMillis = new Date().getTime();
     const response = await postAuthentication({
@@ -136,13 +136,22 @@ describe('Authentication', () => {
     }
   );
 
-  it('returns 401 when email is not valid', async () => {
+  it('should return 401 when email is not valid', async () => {
     const response = await postAuthentication({ password: 'P4ssword' });
     expect(response.status).toBe(401);
   });
 
-  it('returns 401 when password is not valid', async () => {
+  it('should return 401 when password is not valid', async () => {
     const response = await postAuthentication({ email: 'user1@mail.com' });
     expect(response.status).toBe(401);
+  });
+
+  it('should return token in response body when credentials are correct', async () => {
+    await addUser();
+    const response = await postAuthentication({
+      email: 'user1@mail.com',
+      password: 'P4ssword',
+    });
+    expect(response.body.token).not.toBeUndefined();
   });
 });
