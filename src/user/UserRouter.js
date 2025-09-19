@@ -5,6 +5,7 @@ const UserService = require('./UserService');
 const ValidationException = require('../error/ValidationException');
 const ForbiddenException = require('../auth/ForbiddenException');
 const basicAuthentication = require('../middleware/basicAuthentication');
+const pagination = require('../middleware/pagination');
 const router = express.Router();
 
 router.post(
@@ -61,9 +62,9 @@ router.post('/api/1.0/users/token/:token', async (req, res) => {
   return res.send({ message: req.t('account_activation_success') });
 });
 
-router.get('/api/1.0/users', async (req, res) => {
-  let page = Math.max(0, +(req.query.page ?? 0));
-  const users = await UserService.getUsers(page);
+router.get('/api/1.0/users', pagination, async (req, res) => {
+  const { page, size } = req.pagination;
+  const users = await UserService.getUsers(page, size);
   return res.send(users);
 });
 

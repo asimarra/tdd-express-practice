@@ -80,6 +80,34 @@ describe('Listing users', () => {
     const response = await getUsers().query({ page: -1 });
     expect(response.body.page).toBe(0);
   });
+
+  it('should return 5 users and corresponding size indicator when size is set as 5 in request parameter', async () => {
+    await addUsers(11);
+    const response = await getUsers().query({ size: 5 });
+    expect(response.body.content.length).toBe(5);
+    expect(response.body.size).toBe(5);
+  });
+
+  it('should return 10 users and corresponding size indicator when size is set as 1000 in request parameter', async () => {
+    await addUsers(11);
+    const response = await getUsers().query({ size: 1000 });
+    expect(response.body.content.length).toBe(10);
+    expect(response.body.size).toBe(10);
+  });
+
+  it('should return 10 users and corresponding size indicator when size is set as 0 in request parameter', async () => {
+    await addUsers(11);
+    const response = await getUsers().query({ size: 0 });
+    expect(response.body.content.length).toBe(10);
+    expect(response.body.size).toBe(10);
+  });
+
+  it('should return page as 0 and size as 10 when non numeric query params provided for both', async () => {
+    await addUsers(11);
+    const response = await getUsers().query({ size: 'size', page: 'page' });
+    expect(response.body.page).toBe(0);
+    expect(response.body.size).toBe(10);
+  });
 });
 
 describe('Get User', () => {
