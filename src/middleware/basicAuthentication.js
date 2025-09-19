@@ -15,7 +15,6 @@ module.exports = async (req, _, next) => {
         req.authenticatedUser = user;
       }
     }
-
-    next();
   }
+  next();
 };
