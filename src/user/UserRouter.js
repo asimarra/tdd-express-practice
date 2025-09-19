@@ -61,11 +61,17 @@ router.post('/api/1.0/users/token/:token', async (req, res) => {
   return res.send({ message: req.t('account_activation_success') });
 });
 
-router.get('/api/1.0/users', pagination, async (req, res) => {
-  const { page, size } = req.pagination;
-  const users = await UserService.getUsers(page, size);
-  return res.send(users);
-});
+router.get(
+  '/api/1.0/users',
+  basicAuthentication,
+  pagination,
+  async (req, res) => {
+    const { page, size } = req.pagination;
+    const authenticatedUser = req.authenticatedUser;
+    const users = await UserService.getUsers(page, size, authenticatedUser?.id);
+    return res.send(users);
+  }
+);
 
 router.get('/api/1.0/users/:id', async (req, res) => {
   const userId = req.params.id;

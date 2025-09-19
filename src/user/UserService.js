@@ -1,5 +1,6 @@
 const crypto = require('node:crypto');
 const bcryp = require('bcrypt');
+const Sequelize = require('sequelize');
 const User = require('./User');
 const EmailService = require('../email/EmailService');
 const sequelize = require('../config/database');
@@ -51,9 +52,14 @@ const activate = async (token) => {
   return await user.save();
 };
 
-const getUsers = async (page, size) => {
+const getUsers = async (page, size, authenticatedUserId) => {
   const usersWithCount = await User.findAndCountAll({
-    where: { inactive: false },
+    where: {
+      inactive: false,
+      id: {
+        [Sequelize.Op.not]: authenticatedUserId ? authenticatedUserId : 0,
+      },
+    },
     attributes: ['id', 'username', 'email'],
     limit: size,
     offset: page * size,

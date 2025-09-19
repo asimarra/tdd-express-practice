@@ -1,20 +1,28 @@
 const supertest = require('supertest');
+const bcrypt = require('bcrypt');
 const app = require('../src/app');
 const User = require('../src/user/User');
 const sequelize = require('../src/config/database');
 const en = require('../locales/en/translation.json');
 const es = require('../locales/es/translation.json');
 
-const getUsers = () => {
-  return supertest(app).get('/api/1.0/users');
+const getUsers = (options = {}) => {
+  const request = supertest(app).get('/api/1.0/users');
+  if (options.auth) {
+    const { email, password } = options.auth;
+    request.auth(email, password);
+  }
+  return request.send();
 };
 
 const addUsers = async (activeUserCount, inactiveUserCount = 0) => {
+  const password = await bcrypt.hash('P4ssword', 10);
   for (let i = 0; i < activeUserCount + inactiveUserCount; i++) {
     await User.create({
       username: `user${i + 1}`,
       email: `user${i + 1}@mail.com`,
       inactive: i >= activeUserCount,
+      password,
     });
   }
 };
@@ -107,6 +115,14 @@ describe('Listing users', () => {
     const response = await getUsers().query({ size: 'size', page: 'page' });
     expect(response.body.page).toBe(0);
     expect(response.body.size).toBe(10);
+  });
+
+  it('should return user page without logged in user when request has valid authorization', async () => {
+    await addUsers(11);
+    const response = await getUsers({
+      auth: { email: 'user1@mail.com', password: 'P4ssword' },
+    });
+    expect(response.body.totalPages).toBe(1);
   });
 });
 
